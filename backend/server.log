@@ -1,0 +1,10 @@
+INFO:     Started server process [5904]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:56872 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60763 - "POST /api/datasets/upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50502 - "GET /api/datasets/74d2bdbf72d6/profile HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50504 - "GET /api/datasets HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50506 - "POST /api/datasets/upload HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:53069 - "GET /api/datasets/74d2bdbf72d6/profile HTTP/1.1" 200 OK

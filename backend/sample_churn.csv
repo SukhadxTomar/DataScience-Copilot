@@ -1,0 +1,506 @@
+customer_id,tenure_months,monthly_charges,contract_type,payment_method,support_tickets,churned
+C00000,7,85.19,One year,UPI,0,0
+C00001,55,106.75,Month-to-month,Card,0,0
+C00002,47,65.39,Month-to-month,Bank,0,0
+C00003,32,44.78,Month-to-month,Bank,1,0
+C00004,31,,One year,UPI,5,0
+C00005,61,94.6,Month-to-month,Card,1,0
+C00006,7,101.66,Two year,Bank,3,0
+C00007,50,30.53,One year,Card,4,1
+C00008,15,26.66,Two year,UPI,2,0
+C00009,7,79.44,Two year,Cash,1,1
+C00010,38,34.62,One year,Bank,0,0
+C00011,70,102.47,Month-to-month,Bank,3,0
+C00012,53,51.03,Two year,Card,4,1
+C00013,55,,Month-to-month,UPI,2,1
+C00014,51,,Month-to-month,Cash,3,0
+C00015,56,,Two year,Bank,1,0
+C00016,37,48.47,One year,Bank,0,0
+C00017,10,35.36,Month-to-month,Cash,1,0
+C00018,60,,One year,Cash,1,0
+C00019,32,22.11,One year,Bank,2,1
+C00020,36,25.54,Two year,Bank,4,0
+C00021,27,37.46,Two year,Cash,4,0
+C00022,13,25.34,Month-to-month,Cash,0,0
+C00023,66,79.11,Month-to-month,Cash,2,0
+C00024,56,88.07,One year,Card,4,0
+C00025,46,59.36,Month-to-month,Bank,3,0
+C00026,29,51.8,Month-to-month,Cash,2,0
+C00027,59,70.45,Month-to-month,UPI,6,0
+C00028,39,107.5,Month-to-month,Cash,3,0
+C00029,32,105.11,Two year,Bank,4,0
+C00030,32,24.35,Month-to-month,Cash,2,1
+C00031,17,38.15,Month-to-month,Card,0,0
+C00032,7,43.67,Two year,Card,3,0
+C00033,40,44.94,Month-to-month,Cash,1,0
+C00034,64,77.12,Two year,UPI,3,0
+C00035,5,61.63,Month-to-month,UPI,3,0
+C00036,61,24.93,Month-to-month,Cash,2,0
+C00037,59,57.36,Month-to-month,Card,1,0
+C00038,20,72.38,Two year,UPI,1,1
+C00039,45,30.17,One year,Bank,4,0
+C00040,12,103.35,One year,Bank,4,0
+C00041,54,25.2,Month-to-month,UPI,0,0
+C00042,50,,Month-to-month,Cash,3,1
+C00043,26,,One year,Cash,3,1
+C00044,5,104.36,Month-to-month,Bank,2,0
+C00045,69,110.27,One year,UPI,0,0
+C00046,32,117.96,Two year,Bank,1,0
+C00047,64,,Two year,Cash,3,1
+C00048,49,97.95,One year,UPI,1,0
+C00049,56,84.25,Month-to-month,Cash,2,0
+C00050,54,97.9,Month-to-month,Card,2,0
+C00051,14,33.46,Two year,Bank,6,0
+C00052,26,73.61,One year,Bank,6,1
+C00053,34,71.42,One year,UPI,2,0
+C00054,36,105.76,One year,Cash,1,0
+C00055,4,66.28,Month-to-month,Bank,0,0
+C00056,39,58.51,Two year,Cash,4,0
+C00057,11,83.96,Two year,Cash,1,0
+C00058,53,46.65,Two year,Bank,2,0
+C00059,49,33.98,Two year,Bank,3,0
+C00060,66,67.79,Month-to-month,UPI,1,0
+C00061,53,61.69,Month-to-month,Cash,1,0
+C00062,27,43.26,Month-to-month,Card,3,0
+C00063,69,,Two year,Cash,5,0
+C00064,30,,One year,Cash,1,0
+C00065,24,,One year,Cash,4,0
+C00066,65,57.95,Two year,Cash,3,0
+C00067,27,,One year,UPI,2,0
+C00068,6,49.69,Two year,Bank,2,0
+C00069,34,114.89,Two year,Bank,2,0
+C00070,57,111.63,Month-to-month,Card,3,0
+C00071,14,68.09,One year,Cash,1,1
+C00072,33,52.84,Two year,Bank,1,0
+C00073,10,73.54,Two year,Bank,1,0
+C00074,49,,Month-to-month,Cash,4,1
+C00075,34,85.26,Month-to-month,Bank,4,0
+C00076,24,100.44,One year,Bank,3,0
+C00077,17,73.27,Two year,Bank,3,0
+C00078,41,83.29,Month-to-month,Bank,4,0
+C00079,48,48.82,One year,Card,1,0
+C00080,67,93.49,Month-to-month,UPI,1,0
+C00081,32,40.24,Month-to-month,Card,3,0
+C00082,12,89.48,One year,Bank,2,0
+C00083,60,106.07,One year,Cash,3,0
+C00084,45,33.21,One year,Card,1,0
+C00085,50,81.44,Month-to-month,Cash,2,0
+C00086,7,29.51,Two year,Cash,1,0
+C00087,23,92.57,Month-to-month,Cash,0,1
+C00088,55,28.45,Two year,Bank,2,0
+C00089,60,,Month-to-month,Card,4,0
+C00090,31,33.74,Two year,UPI,2,0
+C00091,58,115.89,One year,Bank,1,0
+C00092,60,100.09,One year,UPI,1,0
+C00093,28,79.37,Month-to-month,Card,2,0
+C00094,64,98.26,Two year,Card,0,0
+C00095,21,99.51,Month-to-month,UPI,1,0
+C00096,18,114.6,One year,UPI,1,0
+C00097,49,45.34,Two year,UPI,6,0
+C00098,46,79.01,Two year,UPI,4,0
+C00099,10,29.5,Two year,Card,0,0
+C00100,60,81.62,Month-to-month,UPI,2,0
+C00101,15,37.13,Two year,Cash,3,0
+C00102,58,76.5,Two year,Card,4,0
+C00103,1,77.24,Month-to-month,Card,2,0
+C00104,57,66.6,Month-to-month,UPI,3,0
+C00105,56,72.26,Two year,Bank,2,0
+C00106,56,96.39,Month-to-month,UPI,1,1
+C00107,48,99.92,One year,Card,4,0
+C00108,34,69.22,Month-to-month,Bank,2,0
+C00109,51,79.96,Month-to-month,Bank,1,0
+C00110,20,113.12,Two year,Bank,2,1
+C00111,56,31.97,Month-to-month,Cash,2,0
+C00112,40,31.71,Two year,UPI,2,0
+C00113,33,28.77,Two year,UPI,4,1
+C00114,36,85.79,Month-to-month,Cash,0,0
+C00115,41,,Month-to-month,Card,2,1
+C00116,3,97.43,Two year,UPI,1,0
+C00117,10,87.12,One year,Cash,1,0
+C00118,18,53.36,Month-to-month,Cash,2,0
+C00119,9,109.84,Two year,Cash,1,0
+C00120,32,96.25,Month-to-month,UPI,3,1
+C00121,48,47.05,Month-to-month,UPI,3,0
+C00122,47,56.42,Two year,Cash,3,1
+C00123,34,51.44,Month-to-month,Cash,0,0
+C00124,61,35.76,One year,Cash,1,0
+C00125,41,34.78,Two year,Bank,1,1
+C00126,6,113.61,One year,Bank,4,0
+C00127,55,,One year,Cash,1,1
+C00128,41,58.33,One year,Card,0,0
+C00129,46,92.97,Month-to-month,Bank,2,0
+C00130,41,75.3,One year,Cash,2,0
+C00131,40,113.61,Two year,UPI,1,0
+C00132,7,98.03,Month-to-month,Cash,3,0
+C00133,40,67.94,Two year,Bank,2,0
+C00134,57,57.64,One year,Bank,3,0
+C00135,22,118.66,One year,Cash,0,0
+C00136,43,91.78,Month-to-month,Cash,5,1
+C00137,3,115.12,One year,Card,3,0
+C00138,25,31.85,Month-to-month,Cash,0,0
+C00139,32,105.05,Month-to-month,Bank,1,1
+C00140,70,83.71,Two year,Cash,2,0
+C00141,16,32.19,Month-to-month,UPI,3,0
+C00142,20,78.83,One year,UPI,2,0
+C00143,30,88.61,One year,Cash,6,0
+C00144,71,21.23,Month-to-month,Bank,2,0
+C00145,61,65.43,Month-to-month,Bank,2,0
+C00146,3,102.54,One year,Card,4,0
+C00147,17,49.54,One year,UPI,3,0
+C00148,59,65.85,Two year,UPI,1,0
+C00149,5,64.23,Two year,UPI,2,0
+C00150,61,50.19,Month-to-month,Bank,1,0
+C00151,20,111.84,Month-to-month,Bank,2,0
+C00152,66,98.13,Month-to-month,UPI,2,1
+C00153,21,31.06,One year,Cash,3,0
+C00154,31,119.7,Month-to-month,Cash,2,0
+C00155,47,107.92,Month-to-month,Bank,2,0
+C00156,9,48.39,Two year,Bank,0,0
+C00157,40,103.69,Two year,Cash,5,0
+C00158,36,30.64,Two year,UPI,2,0
+C00159,56,119.91,Month-to-month,Bank,4,1
+C00160,71,86.57,One year,UPI,4,0
+C00161,48,85.01,One year,Card,1,1
+C00162,30,29.04,Month-to-month,Bank,0,0
+C00163,29,109.7,One year,UPI,0,0
+C00164,30,22.9,One year,UPI,1,0
+C00165,58,44.08,One year,UPI,0,0
+C00166,23,34.3,Two year,Bank,5,0
+C00167,12,97.68,Two year,UPI,3,1
+C00168,24,39.82,One year,UPI,1,1
+C00169,2,,Two year,UPI,2,0
+C00170,8,85.63,Two year,Card,2,0
+C00171,7,23.62,One year,Cash,2,0
+C00172,55,20.54,Month-to-month,UPI,2,1
+C00173,52,25.17,Two year,UPI,3,0
+C00174,50,80.59,Two year,Card,2,0
+C00175,33,100.15,Two year,UPI,2,0
+C00176,51,43.86,Month-to-month,Card,3,0
+C00177,12,104.94,One year,Bank,2,0
+C00178,64,25.72,Two year,Cash,1,1
+C00179,36,100.1,One year,Bank,3,0
+C00180,67,112.78,Two year,Cash,3,1
+C00181,11,,Month-to-month,Card,4,0
+C00182,36,89.81,Month-to-month,Cash,0,0
+C00183,50,103.8,Two year,Cash,3,0
+C00184,36,24.02,One year,Cash,3,0
+C00185,32,40.18,One year,Bank,1,0
+C00186,12,32.49,One year,Bank,0,0
+C00187,28,70.45,One year,Bank,3,0
+C00188,17,94.52,Two year,Bank,1,0
+C00189,22,83.0,Month-to-month,Cash,2,0
+C00190,49,105.11,Two year,Bank,2,0
+C00191,45,35.52,Two year,Bank,3,0
+C00192,44,93.46,One year,Bank,4,1
+C00193,26,39.3,One year,Card,1,0
+C00194,69,47.08,Month-to-month,Cash,7,1
+C00195,7,90.99,Two year,UPI,2,0
+C00196,25,118.02,One year,Bank,5,0
+C00197,9,81.15,Month-to-month,UPI,2,0
+C00198,25,25.45,One year,Cash,2,1
+C00199,69,,Two year,Card,2,0
+C00200,27,24.24,Month-to-month,Bank,0,0
+C00201,65,108.41,Month-to-month,Card,2,0
+C00202,36,90.96,Two year,Card,2,0
+C00203,50,37.31,Month-to-month,Bank,0,0
+C00204,33,29.17,Two year,Bank,1,0
+C00205,19,38.35,Two year,UPI,2,0
+C00206,55,118.0,Two year,Card,0,0
+C00207,69,,Two year,UPI,1,0
+C00208,19,98.41,Month-to-month,Card,1,0
+C00209,56,83.64,Month-to-month,Card,2,0
+C00210,19,77.24,One year,Cash,0,1
+C00211,51,34.51,One year,UPI,2,0
+C00212,57,114.6,Two year,Cash,2,0
+C00213,32,50.13,Two year,Card,1,0
+C00214,53,77.8,One year,Card,4,0
+C00215,20,89.98,Two year,Bank,2,0
+C00216,6,84.92,One year,Bank,1,0
+C00217,7,114.06,One year,UPI,2,1
+C00218,32,,One year,Bank,3,0
+C00219,65,70.84,One year,Card,2,1
+C00220,10,60.4,Month-to-month,UPI,2,0
+C00221,33,,Two year,Card,0,0
+C00222,50,31.92,One year,Card,1,0
+C00223,15,33.41,Two year,Bank,1,0
+C00224,52,47.81,One year,Bank,4,0
+C00225,22,50.47,Two year,Cash,2,0
+C00226,58,62.79,Two year,UPI,5,0
+C00227,42,81.1,One year,UPI,3,0
+C00228,39,83.46,One year,Bank,1,0
+C00229,13,61.18,Month-to-month,UPI,1,0
+C00230,33,60.88,Two year,Cash,4,1
+C00231,61,41.76,Two year,Card,3,0
+C00232,2,78.83,Two year,UPI,1,0
+C00233,54,51.7,Two year,Card,3,0
+C00234,35,23.61,Two year,Cash,2,0
+C00235,52,61.84,Two year,UPI,3,1
+C00236,48,67.41,One year,Card,2,0
+C00237,31,,Month-to-month,Bank,2,0
+C00238,22,,Month-to-month,Bank,2,0
+C00239,45,76.58,Month-to-month,UPI,3,0
+C00240,10,90.2,One year,Card,3,0
+C00241,42,84.79,Two year,Cash,2,0
+C00242,7,85.24,One year,Bank,1,0
+C00243,47,51.62,Month-to-month,Card,0,0
+C00244,45,98.74,Month-to-month,Cash,1,0
+C00245,6,,Two year,UPI,2,0
+C00246,54,63.14,Two year,Cash,1,1
+C00247,30,82.6,One year,Card,3,0
+C00248,56,56.07,Two year,Card,0,0
+C00249,3,71.27,Two year,Bank,1,0
+C00250,13,93.67,Two year,Cash,2,0
+C00251,36,108.64,Two year,Cash,2,0
+C00252,14,112.11,One year,Card,2,0
+C00253,24,70.36,One year,Cash,0,1
+C00254,47,72.03,One year,Bank,2,0
+C00255,11,99.99,Month-to-month,Cash,2,0
+C00256,49,51.45,One year,UPI,4,0
+C00257,8,103.74,One year,Cash,2,0
+C00258,13,69.41,One year,Card,2,0
+C00259,42,31.59,One year,UPI,2,0
+C00260,57,27.21,One year,Card,3,1
+C00261,13,104.2,One year,UPI,0,0
+C00262,22,25.56,Month-to-month,Card,2,0
+C00263,66,48.06,One year,Cash,0,0
+C00264,71,,One year,Card,4,1
+C00265,42,37.3,Two year,Card,3,0
+C00266,32,51.39,One year,Cash,4,0
+C00267,25,94.27,One year,Cash,1,1
+C00268,44,21.47,Month-to-month,Card,1,0
+C00269,42,102.72,Month-to-month,UPI,1,1
+C00270,21,105.65,One year,Bank,2,0
+C00271,2,57.23,One year,Bank,2,0
+C00272,11,35.36,One year,Bank,3,0
+C00273,69,80.08,One year,Bank,2,0
+C00274,30,31.97,Two year,Card,1,0
+C00275,35,56.49,Month-to-month,Bank,2,0
+C00276,34,115.84,Month-to-month,Card,6,0
+C00277,56,119.55,Month-to-month,Card,1,0
+C00278,5,97.21,Month-to-month,Bank,1,0
+C00279,6,51.1,Two year,Cash,1,0
+C00280,20,,Month-to-month,UPI,2,0
+C00281,35,90.54,One year,Bank,0,0
+C00282,48,58.78,Month-to-month,Bank,1,1
+C00283,35,84.09,Two year,UPI,0,0
+C00284,32,21.07,Two year,Cash,1,0
+C00285,67,40.91,Month-to-month,UPI,2,0
+C00286,12,72.51,Month-to-month,UPI,1,0
+C00287,41,36.38,Month-to-month,UPI,0,0
+C00288,39,36.59,One year,UPI,4,0
+C00289,34,103.63,Two year,Bank,2,0
+C00290,58,118.91,One year,Bank,6,1
+C00291,19,75.6,Two year,Bank,1,1
+C00292,68,103.91,One year,Card,2,0
+C00293,24,119.03,Month-to-month,Cash,1,1
+C00294,39,34.16,One year,Cash,4,1
+C00295,37,64.82,Month-to-month,UPI,1,0
+C00296,61,,Two year,Card,0,0
+C00297,32,28.0,Month-to-month,Bank,1,0
+C00298,21,,One year,Card,3,0
+C00299,2,63.38,One year,UPI,2,0
+C00300,26,,Month-to-month,Bank,2,0
+C00301,59,35.07,One year,Card,1,0
+C00302,1,38.09,One year,Cash,2,0
+C00303,64,110.71,Month-to-month,UPI,5,0
+C00304,39,24.46,Month-to-month,UPI,1,0
+C00305,10,43.29,Month-to-month,Card,2,0
+C00306,22,49.21,Month-to-month,Bank,2,0
+C00307,40,69.02,One year,Card,2,0
+C00308,23,78.64,Month-to-month,Bank,2,1
+C00309,8,69.33,Two year,Cash,1,1
+C00310,48,28.41,Month-to-month,Bank,1,1
+C00311,48,44.37,One year,Card,3,1
+C00312,9,104.36,Two year,Cash,3,1
+C00313,20,83.76,One year,Card,0,0
+C00314,18,84.91,Two year,Card,5,0
+C00315,47,87.02,Month-to-month,Card,0,0
+C00316,52,96.29,Month-to-month,Card,3,0
+C00317,52,25.81,Month-to-month,Bank,2,0
+C00318,67,56.66,Month-to-month,UPI,3,0
+C00319,55,73.95,Month-to-month,UPI,0,1
+C00320,23,53.85,Month-to-month,Card,3,0
+C00321,8,104.45,Two year,Card,3,1
+C00322,44,68.26,Month-to-month,Bank,1,0
+C00323,66,96.86,Two year,Cash,2,0
+C00324,70,105.2,Two year,Cash,1,0
+C00325,17,70.48,Two year,UPI,1,0
+C00326,17,110.96,Month-to-month,Bank,2,0
+C00327,3,78.71,Two year,Card,3,0
+C00328,11,105.03,One year,Card,5,1
+C00329,40,54.06,Two year,Card,4,0
+C00330,39,69.88,One year,Card,1,0
+C00331,27,73.14,Two year,UPI,5,0
+C00332,23,30.5,One year,Bank,3,0
+C00333,59,59.86,Month-to-month,UPI,1,0
+C00334,33,111.73,One year,Cash,3,0
+C00335,58,83.08,Month-to-month,Cash,2,0
+C00336,69,37.75,Two year,Bank,0,0
+C00337,23,53.89,Month-to-month,UPI,3,0
+C00338,15,39.16,Month-to-month,Card,3,0
+C00339,68,22.48,One year,Card,1,0
+C00340,46,112.75,One year,Bank,1,0
+C00341,21,64.82,Month-to-month,Bank,0,0
+C00342,45,50.75,Two year,Cash,4,0
+C00343,37,79.85,Two year,Cash,2,0
+C00344,65,20.73,Two year,Cash,4,0
+C00345,19,47.8,One year,Bank,1,0
+C00346,71,90.3,One year,Bank,1,0
+C00347,67,,One year,UPI,1,0
+C00348,13,118.18,One year,Card,2,1
+C00349,12,82.04,Month-to-month,Cash,0,0
+C00350,38,67.75,Month-to-month,Cash,1,1
+C00351,4,,Month-to-month,UPI,2,0
+C00352,22,110.33,One year,Cash,1,0
+C00353,31,92.07,Month-to-month,Bank,2,0
+C00354,69,116.32,Month-to-month,Bank,1,0
+C00355,71,98.2,Two year,Bank,3,1
+C00356,11,106.68,One year,Bank,1,0
+C00357,64,31.41,One year,Card,1,0
+C00358,7,93.24,One year,Cash,3,0
+C00359,54,64.01,Two year,Card,2,0
+C00360,61,75.31,Two year,Cash,0,0
+C00361,64,85.41,Month-to-month,UPI,0,1
+C00362,16,116.98,Two year,UPI,2,0
+C00363,64,118.46,One year,Card,3,1
+C00364,9,48.82,Two year,UPI,2,0
+C00365,37,93.38,One year,Card,0,0
+C00366,34,95.0,Month-to-month,Bank,4,0
+C00367,23,54.65,Two year,Card,2,1
+C00368,2,32.39,Month-to-month,Card,2,0
+C00369,55,24.09,Two year,Card,1,0
+C00370,24,97.73,Month-to-month,Card,1,0
+C00371,47,68.97,Month-to-month,UPI,1,0
+C00372,30,,One year,Card,3,0
+C00373,27,66.5,Two year,Bank,0,0
+C00374,63,117.79,One year,Cash,0,0
+C00375,7,61.16,Month-to-month,UPI,2,0
+C00376,53,99.37,Month-to-month,UPI,1,0
+C00377,54,28.48,Two year,Card,3,1
+C00378,27,75.55,Two year,UPI,3,0
+C00379,19,100.21,Month-to-month,Cash,0,1
+C00380,1,112.47,One year,Card,6,1
+C00381,67,102.26,Month-to-month,Bank,2,0
+C00382,68,23.7,Month-to-month,UPI,5,0
+C00383,18,57.27,Two year,Bank,0,0
+C00384,3,24.87,One year,Card,1,0
+C00385,9,30.93,Month-to-month,UPI,0,0
+C00386,5,87.53,One year,UPI,1,0
+C00387,60,91.33,One year,UPI,2,0
+C00388,64,97.37,Month-to-month,UPI,2,0
+C00389,11,106.55,One year,UPI,5,1
+C00390,54,93.94,Month-to-month,Bank,3,0
+C00391,13,100.09,Month-to-month,Card,4,0
+C00392,27,24.9,Two year,Cash,1,1
+C00393,43,,Two year,Card,2,0
+C00394,52,82.19,Month-to-month,Bank,3,0
+C00395,63,105.81,Two year,Cash,4,1
+C00396,4,20.45,One year,UPI,1,0
+C00397,14,71.46,Two year,Bank,2,0
+C00398,20,87.73,Two year,Bank,1,0
+C00399,23,22.96,One year,Cash,1,1
+C00400,71,60.14,One year,Card,4,0
+C00401,56,109.56,One year,Cash,4,0
+C00402,23,87.16,Two year,Cash,0,0
+C00403,69,43.77,Month-to-month,Cash,1,0
+C00404,36,105.28,Month-to-month,Bank,3,0
+C00405,36,54.8,Month-to-month,UPI,0,0
+C00406,31,105.33,Month-to-month,Bank,2,1
+C00407,11,49.89,Month-to-month,Cash,2,0
+C00408,67,79.03,Month-to-month,Bank,3,0
+C00409,1,59.69,Two year,Card,4,0
+C00410,13,47.48,Month-to-month,Cash,2,0
+C00411,17,108.66,Two year,Card,4,0
+C00412,20,38.76,Month-to-month,UPI,5,0
+C00413,10,28.48,Two year,Cash,0,0
+C00414,2,54.19,Month-to-month,Bank,0,0
+C00415,49,91.76,One year,Bank,2,0
+C00416,69,100.74,Month-to-month,Cash,1,0
+C00417,9,119.87,One year,Bank,1,0
+C00418,22,49.64,One year,Bank,2,1
+C00419,36,60.79,One year,Bank,2,0
+C00420,66,33.68,One year,Bank,5,1
+C00421,50,77.49,One year,UPI,0,1
+C00422,55,119.76,Two year,Card,4,0
+C00423,42,90.09,One year,UPI,2,1
+C00424,30,79.52,One year,Bank,1,0
+C00425,15,59.24,Month-to-month,Cash,3,0
+C00426,62,,One year,Card,1,0
+C00427,58,69.69,Month-to-month,Bank,4,0
+C00428,2,33.44,Month-to-month,UPI,1,0
+C00429,51,56.54,Two year,Bank,1,0
+C00430,6,26.72,Month-to-month,Card,0,0
+C00431,53,40.2,One year,Cash,4,0
+C00432,59,21.77,Two year,Card,1,0
+C00433,10,65.33,Two year,Bank,0,0
+C00434,31,83.45,Month-to-month,Bank,2,0
+C00435,9,54.33,Month-to-month,Cash,4,0
+C00436,41,62.04,One year,Cash,2,0
+C00437,66,115.92,One year,Cash,1,0
+C00438,6,95.2,Two year,UPI,1,0
+C00439,29,74.09,Month-to-month,Card,1,0
+C00440,70,48.45,Month-to-month,Bank,2,1
+C00441,22,109.7,Month-to-month,Card,3,0
+C00442,10,43.51,Two year,Card,1,0
+C00443,35,52.53,Month-to-month,Card,2,0
+C00444,37,110.91,One year,Cash,4,1
+C00445,48,72.95,Month-to-month,UPI,2,0
+C00446,23,94.23,Month-to-month,UPI,1,0
+C00447,68,79.07,Two year,Cash,2,0
+C00448,37,85.34,Month-to-month,UPI,4,0
+C00449,21,49.94,Month-to-month,Card,1,0
+C00450,69,44.14,Two year,UPI,5,0
+C00451,66,52.25,One year,UPI,3,0
+C00452,36,35.54,Month-to-month,Card,1,0
+C00453,2,107.43,One year,Bank,1,0
+C00454,43,48.32,Two year,UPI,4,0
+C00455,40,76.15,One year,Bank,1,1
+C00456,11,99.2,One year,UPI,2,0
+C00457,46,98.38,One year,UPI,3,0
+C00458,60,63.84,One year,Bank,6,0
+C00459,8,67.63,Month-to-month,Card,4,1
+C00460,52,119.47,Two year,Bank,1,0
+C00461,10,87.46,Two year,Card,2,1
+C00462,54,,Month-to-month,Bank,1,0
+C00463,30,110.26,Two year,Cash,3,0
+C00464,1,98.76,Two year,Bank,3,0
+C00465,69,38.52,Two year,Card,2,0
+C00466,12,76.22,One year,Bank,4,1
+C00467,43,30.19,One year,Cash,2,1
+C00468,13,85.29,Two year,Card,2,0
+C00469,67,115.53,Month-to-month,Card,2,1
+C00470,53,71.27,Two year,UPI,6,0
+C00471,58,,Two year,Card,1,0
+C00472,31,23.58,Two year,Bank,3,0
+C00473,34,,One year,Card,3,0
+C00474,46,30.3,One year,Card,2,1
+C00475,56,24.11,Month-to-month,Bank,3,0
+C00476,61,44.61,Two year,Cash,1,0
+C00477,2,26.55,One year,Card,1,0
+C00478,48,65.51,Month-to-month,Card,1,0
+C00479,8,71.61,Two year,Card,3,0
+C00480,21,51.26,One year,Cash,1,0
+C00481,59,25.1,One year,UPI,2,0
+C00482,18,31.16,Month-to-month,Card,2,0
+C00483,57,58.45,Two year,Bank,2,0
+C00484,33,26.05,One year,Bank,1,0
+C00485,17,89.82,Two year,Bank,1,0
+C00486,24,40.7,Two year,Card,2,0
+C00487,38,50.21,Month-to-month,Card,2,1
+C00488,55,59.41,Month-to-month,Cash,2,0
+C00489,44,61.66,Two year,Bank,1,1
+C00490,67,20.17,One year,Bank,0,0
+C00491,62,31.21,One year,Bank,3,0
+C00492,54,106.28,Month-to-month,UPI,6,0
+C00493,43,20.12,One year,Cash,1,0
+C00494,21,70.82,Two year,Bank,1,1
+C00495,30,,Month-to-month,Card,5,0
+C00496,9,53.31,One year,UPI,2,0
+C00497,27,63.13,Two year,UPI,3,0
+C00498,66,98.06,Month-to-month,Card,1,0
+C00499,31,,Month-to-month,UPI,0,0
+C00000,7,85.19,One year,UPI,0,0
+C00001,55,106.75,Month-to-month,Card,0,0
+C00002,47,65.39,Month-to-month,Bank,0,0
+C00003,32,44.78,Month-to-month,Bank,1,0
+C00004,31,,One year,UPI,5,0
