@@ -22,6 +22,8 @@ class RunState(TypedDict, total=False):
     insights: dict[str, Any]
     problem_spec: dict[str, Any]     # problem type, target, columns to drop
     cleaning_report: dict[str, Any]  # what cleaning changed, cleaned data path
+    feature_plan: dict[str, Any]     # which columns to expand/log-transform/drop
+    feature_report: dict[str, Any]   # what feature engineering changed, features path
     training_report: dict[str, Any]  # per-model CV scores, best model path
     evaluation_report: dict[str, Any]  # held-out test metrics
     summary: str

@@ -27,6 +27,13 @@ uvicorn app.main:app --reload
 
 API docs: http://localhost:8000/docs
 
+Run the tests:
+
+```bash
+cd backend
+pytest
+```
+
 Configuration goes in `backend/.env`:
 
 ```
@@ -52,6 +59,6 @@ APP_LLM_MODEL=anthropic/claude-sonnet-4.5
 
 1. ✅ Backend foundation: upload + dataset profiler
 2. ✅ LLM abstraction (provider-independent) + EDA agent + 3-node LangGraph pipeline
-3. ML tools + agents: cleaning, features, training, evaluation
+3. ✅ ML tools + agents: cleaning, features, training, evaluation
 4. Dynamic Planner + capability registry + validator + executor
 5. SHAP + recommendations + report + frontend

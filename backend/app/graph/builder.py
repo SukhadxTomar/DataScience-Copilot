@@ -1,9 +1,10 @@
 """Pipeline graph assembly.
 
-Current shape (linear, seven nodes):
+Current shape (linear, nine nodes):
 
     START -> profile -> insights -> problem_spec -> cleaning
-          -> training -> evaluation -> summarize -> END
+          -> feature_plan -> features -> training -> evaluation
+          -> summarize -> END
 
 State is checkpointed to SQLite after every node, so an interrupted run
 resumes without re-executing completed steps. The planner/executor loop
@@ -23,6 +24,8 @@ from app.core.config import settings
 from app.graph.nodes import (
     cleaning_node,
     evaluation_node,
+    feature_plan_node,
+    features_node,
     insights_node,
     problem_spec_node,
     profile_node,
@@ -41,6 +44,8 @@ def build_graph():
     graph.add_node("insights", insights_node)
     graph.add_node("problem_spec", problem_spec_node)
     graph.add_node("cleaning", cleaning_node)
+    graph.add_node("feature_plan", feature_plan_node)
+    graph.add_node("features", features_node)
     graph.add_node("training", training_node)
     graph.add_node("evaluation", evaluation_node)
     graph.add_node("summarize", summarize_node)
@@ -49,7 +54,9 @@ def build_graph():
     graph.add_edge("profile", "insights")
     graph.add_edge("insights", "problem_spec")
     graph.add_edge("problem_spec", "cleaning")
-    graph.add_edge("cleaning", "training")
+    graph.add_edge("cleaning", "feature_plan")
+    graph.add_edge("feature_plan", "features")
+    graph.add_edge("features", "training")
     graph.add_edge("training", "evaluation")
     graph.add_edge("evaluation", "summarize")
     graph.add_edge("summarize", END)

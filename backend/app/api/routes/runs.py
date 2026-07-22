@@ -38,6 +38,7 @@ class RunResponse(BaseModel):
     insights: dict[str, Any] | None = None
     problem_spec: dict[str, Any] | None = None
     cleaning_report: dict[str, Any] | None = None
+    feature_report: dict[str, Any] | None = None
     training_report: dict[str, Any] | None = None
     evaluation_report: dict[str, Any] | None = None
     error: str | None = None
@@ -99,6 +100,7 @@ def create_run(req: CreateRunRequest) -> RunResponse:
         "insights": final_state.get("insights"),
         "problem_spec": final_state.get("problem_spec"),
         "cleaning_report": final_state.get("cleaning_report"),
+        "feature_report": final_state.get("feature_report"),
         "training_report": final_state.get("training_report"),
         "evaluation_report": final_state.get("evaluation_report"),
     }

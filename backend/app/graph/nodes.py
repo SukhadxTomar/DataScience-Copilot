@@ -12,12 +12,14 @@ import logging
 from pathlib import Path
 
 from app.agents.eda_agent import EDAInsightsAgent
+from app.agents.feature_agent import FeatureEngineeringAgent
 from app.agents.problem_agent import ProblemSpecAgent
 from app.core.config import settings
 from app.graph.state import RunState
 from app.llm.factory import get_llm_client
 from app.tools.cleaning import clean_dataset
 from app.tools.evaluation import evaluate_model
+from app.tools.features import engineer_features
 from app.tools.profiler import profile_dataset
 from app.tools.training import train_models
 
@@ -91,11 +93,50 @@ def cleaning_node(state: RunState) -> dict:
     return {"cleaning_report": report}
 
 
+def feature_plan_node(state: RunState) -> dict:
+    """Decide which feature transforms to apply (LLM call).
+
+    The plan is based on a profile of the *cleaned* data, not the raw
+    profile, so skew and dtypes reflect the columns that actually survive
+    into modeling.
+    """
+    cleaned_path = Path(state["cleaning_report"]["cleaned_path"])
+    cleaned_profile = profile_dataset(cleaned_path)
+
+    agent = FeatureEngineeringAgent(llm=get_llm_client())
+    plan = agent.run(state["problem_spec"], cleaned_profile)
+    logger.info(
+        "run=%s feature plan: expand=%s, log=%s, drop=%s",
+        state["run_id"], plan.datetime_columns,
+        plan.log_transform_columns, plan.drop_columns,
+    )
+    return {"feature_plan": plan.model_dump()}
+
+
+def features_node(state: RunState) -> dict:
+    """Apply the feature plan (deterministic tool)."""
+    spec = state["problem_spec"]
+    plan = state["feature_plan"]
+    report = engineer_features(
+        cleaned_path=Path(state["cleaning_report"]["cleaned_path"]),
+        out_path=_artifacts_dir(state) / "features.parquet",
+        target_column=spec["target_column"],
+        datetime_columns=plan["datetime_columns"],
+        log_transform_columns=plan["log_transform_columns"],
+        drop_columns=plan["drop_columns"],
+    )
+    logger.info(
+        "run=%s features: %d -> %d columns",
+        state["run_id"], report["n_features_before"], report["n_features_after"],
+    )
+    return {"feature_report": report}
+
+
 def training_node(state: RunState) -> dict:
     """Train candidate models with cross-validation (deterministic tool)."""
     spec = state["problem_spec"]
     report = train_models(
-        data_path=Path(state["cleaning_report"]["cleaned_path"]),
+        data_path=Path(state["feature_report"]["features_path"]),
         target_column=spec["target_column"],
         problem_type=spec["problem_type"],
         artifacts_dir=_artifacts_dir(state),
@@ -111,7 +152,7 @@ def evaluation_node(state: RunState) -> dict:
     """Score the winning model on a held-out test split (deterministic tool)."""
     spec = state["problem_spec"]
     report = evaluate_model(
-        data_path=Path(state["cleaning_report"]["cleaned_path"]),
+        data_path=Path(state["feature_report"]["features_path"]),
         model_path=Path(state["training_report"]["model_path"]),
         target_column=spec["target_column"],
         problem_type=spec["problem_type"],
@@ -126,6 +167,7 @@ def summarize_node(state: RunState) -> dict:
     insights = state["insights"]
     spec = state["problem_spec"]
     cleaning = state["cleaning_report"]
+    features = state["feature_report"]
     training = state["training_report"]
     evaluation = state["evaluation_report"]
 
@@ -136,6 +178,9 @@ def summarize_node(state: RunState) -> dict:
         f"Problem: {spec['problem_type']} — predicting '{spec['target_column']}'.",
         f"Cleaning: removed {cleaning['rows_removed']} rows, "
         f"dropped columns {cleaning['dropped_columns'] or 'none'}.",
+        f"Features: {features['n_features_before']} -> {features['n_features_after']} columns "
+        f"(expanded {features['expanded_datetime_columns'] or 'none'}, "
+        f"log-transformed {features['log_transformed_columns'] or 'none'}).",
         "",
         "Model leaderboard (cross-validated):",
     ]

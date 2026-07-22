@@ -66,7 +66,7 @@ def profile_dataset(path: Path) -> dict[str, Any]:
         "n_rows": n_rows,
         "n_cols": n_cols,
         "n_duplicate_rows": int(df.duplicated().sum()),
-        "memory_mb": round(df.memory_usage(deep=True).sum() / 1e6, 2),
+        "memory_mb": round(float(df.memory_usage(deep=True).sum()) / 1e6, 2),
         "columns": columns,
         "warnings": _warnings(df, columns),
     }
