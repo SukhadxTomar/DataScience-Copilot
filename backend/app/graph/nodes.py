@@ -14,13 +14,16 @@ from pathlib import Path
 from app.agents.eda_agent import EDAInsightsAgent
 from app.agents.feature_agent import FeatureEngineeringAgent
 from app.agents.problem_agent import ProblemSpecAgent
+from app.agents.recommendations_agent import RecommendationsAgent
 from app.core.config import settings
 from app.graph.state import RunState
 from app.llm.factory import get_llm_client
 from app.tools.cleaning import clean_dataset
 from app.tools.evaluation import evaluate_model
+from app.tools.explain import explain_model
 from app.tools.features import engineer_features
 from app.tools.profiler import profile_dataset
+from app.tools.report import assemble_report
 from app.tools.training import train_models
 
 logger = logging.getLogger(__name__)
@@ -161,19 +164,75 @@ def evaluation_node(state: RunState) -> dict:
     return {"evaluation_report": report}
 
 
+def explain_node(state: RunState) -> dict:
+    """Compute global feature importances for the trained model (tool)."""
+    spec = state["problem_spec"]
+    training = state["training_report"]
+    report = explain_model(
+        data_path=Path(state["feature_report"]["features_path"]),
+        model_path=Path(training["model_path"]),
+        target_column=spec["target_column"],
+        problem_type=spec["problem_type"],
+        best_model=training["best_model"],
+    )
+    logger.info(
+        "run=%s explain: %s, %d features",
+        state["run_id"], report["method"], len(report["top_features"]),
+    )
+    return {"explanation_report": report}
+
+
+def recommendations_node(state: RunState) -> dict:
+    """Turn metrics + drivers into business recommendations (LLM call)."""
+    agent = RecommendationsAgent(llm=get_llm_client())
+    report = agent.run(
+        state["problem_spec"],
+        state["evaluation_report"],
+        state["explanation_report"],
+    )
+    logger.info(
+        "run=%s recommendations: %d items", state["run_id"], len(report.recommendations)
+    )
+    return {"recommendations": report.model_dump()}
+
+
+def report_node(state: RunState) -> dict:
+    """Assemble the consolidated final report and render report.md (tool)."""
+    report = assemble_report(
+        state_slice={
+            "run_id": state["run_id"],
+            "dataset_id": state["dataset_id"],
+            "profile": state["profile"],
+            "insights": state.get("insights"),
+            "problem_spec": state["problem_spec"],
+            "cleaning_report": state["cleaning_report"],
+            "feature_report": state["feature_report"],
+            "training_report": state["training_report"],
+            "evaluation_report": state["evaluation_report"],
+            "explanation_report": state["explanation_report"],
+            "recommendations": state["recommendations"],
+            "summary": state.get("summary"),
+        },
+        artifacts_dir=_artifacts_dir(state),
+    )
+    logger.info("run=%s report written: %s", state["run_id"], report["report_path"])
+    return {"report": report}
+
+
 def summarize_node(state: RunState) -> dict:
     """Assemble the final run summary (plain Python, no LLM)."""
     profile = state["profile"]
-    insights = state["insights"]
+    insights = state.get("insights")  # optional capability — may be skipped
     spec = state["problem_spec"]
     cleaning = state["cleaning_report"]
     features = state["feature_report"]
     training = state["training_report"]
     evaluation = state["evaluation_report"]
 
-    lines = [
-        f"Dataset: {profile['n_rows']} rows x {profile['n_cols']} columns.",
-        insights["summary"],
+    lines = [f"Dataset: {profile['n_rows']} rows x {profile['n_cols']} columns."]
+    if insights:
+        lines.append(insights["summary"])
+    lines += [
         "",
         f"Problem: {spec['problem_type']} — predicting '{spec['target_column']}'.",
         f"Cleaning: removed {cleaning['rows_removed']} rows, "

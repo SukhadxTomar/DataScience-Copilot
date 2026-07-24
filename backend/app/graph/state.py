@@ -26,7 +26,20 @@ class RunState(TypedDict, total=False):
     feature_report: dict[str, Any]   # what feature engineering changed, features path
     training_report: dict[str, Any]  # per-model CV scores, best model path
     evaluation_report: dict[str, Any]  # held-out test metrics
+    explanation_report: dict[str, Any]  # global feature importances (SHAP/fallback)
+    recommendations: dict[str, Any]  # business recommendations
+    report: dict[str, Any]           # consolidated final report + report path
     summary: str
+
+    # Planning / execution control (Phase 4)
+    execution_plan: list[str]        # validated, ordered capability names
+    plan_reasoning: str              # planner's justification
+    plan_cursor: int                 # index of the next capability to run
+    replan_count: int                # runtime replans consumed so far
+    warnings: list[str]              # non-fatal notices (dropped names, fallbacks)
+    errors: list[str]                # validator errors surfaced to a human
+    plan_error: str | None           # last capability runtime failure, if any
+    failed_capability: str | None    # name of the capability that failed
 
     # Control
     status: str

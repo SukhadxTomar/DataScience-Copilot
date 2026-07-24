@@ -3,7 +3,7 @@
 Runs the whole LangGraph pipeline on the synthetic dataset with the LLM
 calls stubbed out by a FakeLLMClient. This exercises the real cleaning,
 feature engineering, training, and evaluation tools wired together through
-the graph — the integration Phase 3 is meant to deliver.
+the dynamic Planner + router executor (Phase 4) over the real tools.
 """
 
 from __future__ import annotations
@@ -16,8 +16,11 @@ import pytest
 from app.agents.eda_agent import Insight, InsightReport
 from app.agents.feature_agent import FeaturePlan
 from app.agents.problem_agent import ProblemSpec
+from app.agents.recommendations_agent import Recommendation, RecommendationsReport
 from app.core.config import settings
 from app.llm.fake import FakeLLMClient
+from app.planner.planner_agent import ExecutionPlan
+from app.planner.registry import CANONICAL_PLAN
 from tests.conftest import make_dataframe
 
 
@@ -34,9 +37,11 @@ def pipeline_env(tmp_path: Path, monkeypatch):
     make_dataframe().to_csv(ds_dir / "raw.csv", index=False)
     (ds_dir / "metadata.json").write_text(json.dumps({"dataset_id": dataset_id}))
 
-    # One shared fake serves all three LLM nodes, popping responses in the
-    # order the graph calls them: insights -> problem_spec -> feature_plan.
+    # One shared fake serves every LLM node, popping responses in the order the
+    # graph calls them: planner first, then the canonical plan's LLM steps
+    # (insights -> problem_spec -> feature_plan -> recommendations).
     fake = FakeLLMClient(responses=[
+        ExecutionPlan(steps=CANONICAL_PLAN, reasoning="Full pipeline for a clean tabular set."),
         InsightReport(
             summary="A churn dataset with an id column and a signup date.",
             insights=[Insight(
@@ -60,8 +65,20 @@ def pipeline_env(tmp_path: Path, monkeypatch):
             drop_columns=[],
             reasoning="signup_date holds seasonality; income is right-skewed.",
         ),
+        RecommendationsReport(
+            narrative="The model separates churners adequately; act on the top drivers.",
+            recommendations=[Recommendation(
+                title="Focus retention on the strongest driver",
+                detail="income is the top SHAP driver of churn.",
+                expected_impact="Targeted outreach should lower churn.",
+                confidence="medium",
+            )],
+        ),
     ])
+    # Two modules resolve get_llm_client independently: the capability nodes
+    # (app.graph.nodes) and the planner (app.planner.planner_node).
     monkeypatch.setattr("app.graph.nodes.get_llm_client", lambda: fake)
+    monkeypatch.setattr("app.planner.planner_node.get_llm_client", lambda: fake)
 
     # Rebuild the graph so it opens its checkpoint DB under the tmp data dir.
     from app.graph import builder
@@ -75,7 +92,10 @@ def pipeline_env(tmp_path: Path, monkeypatch):
             "problem_text": "Predict which customers will churn.",
             "status": "running",
         }
-        return graph.invoke(state, config={"configurable": {"thread_id": "run001"}})
+        return graph.invoke(
+            state,
+            config={"configurable": {"thread_id": "run001"}, "recursion_limit": 30},
+        )
 
     yield run
     builder.build_graph.cache_clear()
@@ -85,6 +105,11 @@ def test_full_pipeline_runs_end_to_end(pipeline_env):
     final = pipeline_env()
 
     assert final["status"] == "completed"
+
+    # The planner's validated plan drove execution and is exposed on the state.
+    assert final["execution_plan"] == CANONICAL_PLAN
+    assert final["plan_reasoning"]
+    assert final["plan_cursor"] == len(CANONICAL_PLAN)
 
     # Cleaning dropped the id column.
     assert "customer_id" in final["cleaning_report"]["dropped_columns"]
@@ -102,6 +127,18 @@ def test_full_pipeline_runs_end_to_end(pipeline_env):
 
     # Evaluation produced held-out metrics.
     assert "accuracy" in final["evaluation_report"]["metrics"]
+
+    # Explainability produced ranked feature importances.
+    exp = final["explanation_report"]
+    assert exp["method"] in {"tree_shap", "linear_shap", "permutation_importance"}
+    assert len(exp["top_features"]) > 0
+
+    # Recommendations came through.
+    assert final["recommendations"]["recommendations"]
+
+    # The consolidated report was assembled and its markdown written to disk.
+    assert Path(final["report"]["report_path"]).exists()
+    assert final["report"]["model"]["best_model"] == final["training_report"]["best_model"]
 
     # The summary mentions the feature step.
     assert "Features:" in final["summary"]

@@ -35,12 +35,18 @@ class RunResponse(BaseModel):
     problem_text: str
     created_at: str
     summary: str | None = None
+    execution_plan: list[str] | None = None
+    plan_reasoning: str | None = None
+    warnings: list[str] | None = None
     insights: dict[str, Any] | None = None
     problem_spec: dict[str, Any] | None = None
     cleaning_report: dict[str, Any] | None = None
     feature_report: dict[str, Any] | None = None
     training_report: dict[str, Any] | None = None
     evaluation_report: dict[str, Any] | None = None
+    explanation_report: dict[str, Any] | None = None
+    recommendations: dict[str, Any] | None = None
+    report: dict[str, Any] | None = None
     error: str | None = None
 
 
@@ -67,7 +73,10 @@ def create_run(req: CreateRunRequest) -> RunResponse:
     }
 
     graph = build_graph()
-    config = {"configurable": {"thread_id": run_id}}
+    # recursion_limit backstops the router loop: it caps total node visits so a
+    # bug that fails to advance the plan cursor trips the limit instead of
+    # looping forever.
+    config = {"configurable": {"thread_id": run_id}, "recursion_limit": 30}
 
     try:
         final_state = graph.invoke(initial_state, config=config)
@@ -97,12 +106,18 @@ def create_run(req: CreateRunRequest) -> RunResponse:
         "status": final_state.get("status", "completed"),
         "created_at": created_at,
         "summary": final_state.get("summary"),
+        "execution_plan": final_state.get("execution_plan"),
+        "plan_reasoning": final_state.get("plan_reasoning"),
+        "warnings": final_state.get("warnings"),
         "insights": final_state.get("insights"),
         "problem_spec": final_state.get("problem_spec"),
         "cleaning_report": final_state.get("cleaning_report"),
         "feature_report": final_state.get("feature_report"),
         "training_report": final_state.get("training_report"),
         "evaluation_report": final_state.get("evaluation_report"),
+        "explanation_report": final_state.get("explanation_report"),
+        "recommendations": final_state.get("recommendations"),
+        "report": final_state.get("report"),
     }
     (_runs_dir(run_id) / "run.json").write_text(json.dumps(record, indent=2))
 
@@ -127,6 +142,19 @@ def download_model(run_id: str) -> FileResponse:
         model_path,
         media_type="application/octet-stream",
         filename=f"model_{run_id}.joblib",
+    )
+
+
+@router.get("/{run_id}/report")
+def download_report(run_id: str) -> FileResponse:
+    """Download the consolidated Markdown report produced by a run."""
+    report_path = settings.artifacts_dir / run_id / "report.md"
+    if not report_path.exists():
+        raise HTTPException(status_code=404, detail="No report for this run")
+    return FileResponse(
+        report_path,
+        media_type="text/markdown",
+        filename=f"report_{run_id}.md",
     )
 
 
