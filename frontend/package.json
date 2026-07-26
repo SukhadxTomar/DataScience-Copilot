@@ -1,0 +1,33 @@
+{
+  "name": "ai-data-science-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "three": "^0.169.0",
+    "framer-motion": "^11.11.0",
+    "lucide-react": "^0.454.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@types/three": "^0.169.0",
+    "typescript": "^5.6.3",
+    "tailwindcss": "^3.4.14",
+    "postcss": "^8.4.47",
+    "autoprefixer": "^10.4.20"
+  }
+}
