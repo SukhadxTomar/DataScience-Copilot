@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     data_dir: Path = Path("storage")
 
     # API
-    cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000","https://data-science-copilot-red.vercel.app"]
 
     # Upload limits
     max_upload_mb: int = 200
