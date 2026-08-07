@@ -62,8 +62,8 @@ APP_LLM_MODEL=anthropic/claude-sonnet-4.5
 
 ## Build phases
 
-1. ✅ Backend foundation: upload + dataset profiler
-2. ✅ LLM abstraction (provider-independent) + EDA agent + 3-node LangGraph pipeline
-3. ✅ ML tools + agents: cleaning, features, training, evaluation
-4. ✅ Dynamic Planner + capability registry + validator + executor
-5. 🚧 SHAP + recommendations + report (backend ✅) + frontend (pending)
+1.  Backend foundation: upload + dataset profiler
+2.  LLM abstraction (provider-independent) + EDA agent + 3-node LangGraph pipeline
+3.  ML tools + agents: cleaning, features, training, evaluation
+4.  Dynamic Planner + capability registry + validator + executor
+5.  SHAP + recommendations + report (backend ✅) + frontend (pending)
