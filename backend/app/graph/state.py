@@ -40,6 +40,16 @@ class RunState(TypedDict, total=False):
     errors: list[str]                # validator errors surfaced to a human
     plan_error: str | None           # last capability runtime failure, if any
     failed_capability: str | None    # name of the capability that failed
+    failed_exc_type: str | None      # exception class name, for the diagnoser
+
+    # Reflection / auto-fix control (Phase 5)
+    reflection_history: list[dict[str, Any]]   # dumped ReflectionRecord per cycle
+    reflection_attempts: dict[str, int]        # capability name -> reflect cycles used
+    repair_attempts: int                       # total repairs applied this run
+    last_repair: dict[str, Any] | None         # dumped RepairResult of most recent repair
+    pending_retry_capability: str | None       # set by reflect_node so route re-dispatches
+    escalate_to_planner: bool                  # reflect_node -> route -> "planner"
+    planner_hint: dict[str, Any] | None        # dumped PlannerHint for the planner
 
     # Control
     status: str

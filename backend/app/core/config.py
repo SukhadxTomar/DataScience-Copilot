@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     plan_attempts: int = 3     # tries for the planner to produce a valid plan
     replan_attempts: int = 2   # runtime replans allowed when a capability fails
 
+    # Reflection + auto-fix — bounded retries (see app/reflection)
+    reflection_attempts: int = 2   # reflect cycles allowed per failing capability
+    repair_attempts: int = 4       # total repairs applied across a whole run
+    diagnosis_timeout_s: float = 20.0  # wall-clock cap on the LLM diagnosis fallback
+
     @property
     def datasets_dir(self) -> Path:
         return self.data_dir / "datasets"

@@ -63,22 +63,25 @@ def test_planner_node_needs_input_when_no_valid_plan(monkeypatch):
     assert out["errors"]
 
 
-def test_planner_node_replan_retries_then_stops(monkeypatch):
-    # No LLM needed on the replan path — it retries the existing plan.
+def test_planner_node_escalation_retries_then_stops(monkeypatch):
+    # The planner's replan path is now driven by the reflection layer's
+    # escalate_to_planner flag (not a raw plan_error), and no LLM is needed —
+    # it retries the existing checkpointed plan from the failed step.
     base = {
         "run_id": "r1",
         "execution_plan": CANONICAL_PLAN,
         "plan_cursor": 4,
-        "plan_error": "training blew up",
         "failed_capability": "training",
+        "escalate_to_planner": True,
     }
-    # First replan (count 0 -> 1): clears error, keeps going.
+    # First escalation (count 0 -> 1): clears the flag, keeps going.
     out1 = pn.planner_node({**base, "replan_count": 0})
     assert out1["replan_count"] == 1
-    assert out1["plan_error"] is None
+    assert out1["escalate_to_planner"] is False
     assert "status" not in out1
 
-    # Budget is replan_attempts=2; the third failure (count 2 -> 3) stops.
+    # Budget is replan_attempts=2; the third escalation (count 2 -> 3) stops.
     out_stop = pn.planner_node({**base, "replan_count": 2})
     assert out_stop["status"] == "needs_input"
+    assert out_stop["escalate_to_planner"] is False
     assert any("training" in e for e in out_stop["errors"])

@@ -77,38 +77,16 @@ def generate_plan(
 
 
 def planner_node(state: RunState) -> dict:
-    """Produce the execution plan, or handle a bounded runtime replan."""
-    # A replan is triggered when a capability runner failed at execution time
-    # (the wrapper set ``plan_error`` without advancing the cursor).
-    if state.get("plan_error"):
-        failed = state.get("failed_capability")
-        replan_count = state.get("replan_count", 0) + 1
-        if replan_count > settings.replan_attempts:
-            logger.warning(
-                "run=%s giving up after %d replans; '%s' keeps failing",
-                state["run_id"], settings.replan_attempts, failed,
-            )
-            return {
-                "status": "needs_input",
-                "plan_error": None,
-                "errors": [
-                    f"capability '{failed}' failed after "
-                    f"{settings.replan_attempts} replans: {state['plan_error']}"
-                ],
-            }
-        logger.info(
-            "run=%s replan %d/%d, retrying after '%s' failed",
-            state["run_id"], replan_count, settings.replan_attempts, failed,
-        )
-        # Retry the current plan from the failed step: keep execution_plan and
-        # plan_cursor as-is, just clear the error so the router resumes there.
-        return {
-            "replan_count": replan_count,
-            "plan_error": None,
-            "failed_capability": None,
-            "warnings": state.get("warnings", [])
-            + [f"replan {replan_count}: retrying after '{failed}' failed"],
-        }
+    """Produce the execution plan, or handle a bounded escalation from reflect.
+
+    An escalation is triggered when the reflection layer could not auto-fix a
+    failure and set ``escalate_to_planner`` (reflection budget exhausted, no
+    repair mapped, or a planning concern such as a model-config/resource issue
+    carrying a ``planner_hint``). On escalation the planner decides how to modify
+    execution strategy within its own ``replan_attempts`` budget.
+    """
+    if state.get("escalate_to_planner"):
+        return _handle_escalation(state)
 
     # First-time planning.
     steps, reasoning, warnings, errors = generate_plan(
@@ -139,17 +117,96 @@ def planner_node(state: RunState) -> dict:
     }
 
 
+def _handle_escalation(state: RunState) -> dict:
+    """Bounded response to a reflection escalation.
+
+    The reflection layer has already diagnosed the failure and, when relevant,
+    attached a ``planner_hint``. Today the planner's action is a bounded retry of
+    the current plan from the failed step (clearing the escalation flags), giving
+    up into ``needs_input`` once ``replan_attempts`` is exhausted. The hint and
+    reflection history are surfaced in warnings/state so a future planner revision
+    (model swap, plan edit) can act on them without changing this control flow.
+    """
+    failed = state.get("failed_capability") or state.get(
+        "pending_retry_capability"
+    )
+    replan_count = state.get("replan_count", 0) + 1
+    hint = state.get("planner_hint")
+
+    if replan_count > settings.replan_attempts:
+        logger.warning(
+            "run=%s giving up after %d replans; '%s' keeps failing",
+            state["run_id"], settings.replan_attempts, failed,
+        )
+        history = state.get("reflection_history", [])
+        detail = _last_diagnosis_detail(history)
+        return {
+            "status": "needs_input",
+            "escalate_to_planner": False,
+            "planner_hint": None,
+            "errors": [
+                f"capability '{failed}' could not be auto-repaired after "
+                f"{settings.replan_attempts} planner escalations"
+                + (f": {detail}" if detail else "")
+            ],
+        }
+
+    logger.info(
+        "run=%s planner escalation %d/%d after '%s' (hint=%s)",
+        state["run_id"], replan_count, settings.replan_attempts, failed, hint,
+    )
+    warnings = state.get("warnings", []) + [
+        f"planner escalation {replan_count}: retrying after '{failed}' "
+        f"could not be auto-repaired"
+    ]
+    if hint:
+        warnings.append(f"planner hint: {hint}")
+    # Retry the current plan from the failed step: keep execution_plan and
+    # plan_cursor as-is, clear the escalation so the router resumes there.
+    return {
+        "replan_count": replan_count,
+        "escalate_to_planner": False,
+        "planner_hint": None,
+        "pending_retry_capability": None,
+        "warnings": warnings,
+    }
+
+
+def _last_diagnosis_detail(history: list[dict]) -> str:
+    """Best-effort human detail from the most recent reflection record."""
+    if not history:
+        return ""
+    last = history[-1]
+    diagnosis = last.get("diagnosis") or {}
+    category = diagnosis.get("category", "")
+    reason = diagnosis.get("reason", "")
+    return f"{category} — {reason}".strip(" —")
+
+
 def route(state: RunState) -> str:
     """Pure router: pick the next node from the plan and cursor.
 
-    Returns a capability name (== node name), ``"planner"`` to replan after a
-    runtime failure, or ``"__end__"`` when the plan is done or the run has
-    stopped for human input.
+    Returns a capability name (== node name), ``"reflect"`` to diagnose a runtime
+    failure, ``"planner"`` to replan after the reflection layer escalates, or
+    ``"__end__"`` when the plan is done or the run has stopped for human input.
+
+    Precedence matters:
+      1. ``needs_input`` -> end (the run has stopped for a human).
+      2. A fresh ``plan_error`` -> reflect (diagnose + auto-fix first).
+      3. ``escalate_to_planner`` -> planner (reflection exhausted / a planning
+         concern the reflect node handed off).
+      4. ``pending_retry_capability`` -> re-run that just-repaired capability.
+      5. Otherwise walk the plan by the cursor.
     """
     if state.get("status") == "needs_input":
         return "__end__"
     if state.get("plan_error"):
+        return "reflect"
+    if state.get("escalate_to_planner"):
         return "planner"
+    retry = state.get("pending_retry_capability")
+    if retry:
+        return retry
     plan = state.get("execution_plan") or []
     cursor = state.get("plan_cursor", 0)
     if cursor >= len(plan):

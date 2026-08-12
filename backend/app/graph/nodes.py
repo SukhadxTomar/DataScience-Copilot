@@ -24,7 +24,7 @@ from app.tools.explain import explain_model
 from app.tools.features import engineer_features
 from app.tools.profiler import profile_dataset
 from app.tools.report import assemble_report
-from app.tools.training import train_models
+from app.tools.training import CV_FOLDS, train_models
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +143,7 @@ def training_node(state: RunState) -> dict:
         target_column=spec["target_column"],
         problem_type=spec["problem_type"],
         artifacts_dir=_artifacts_dir(state),
+        cv_folds=spec.get("cv_folds", CV_FOLDS),
     )
     logger.info(
         "run=%s best model: %s (%s=%.4f)",

@@ -27,6 +27,7 @@ from app.graph.nodes import profile_node
 from app.graph.state import RunState
 from app.planner.planner_node import planner_node, route
 from app.planner.registry import REGISTRY, Capability
+from app.reflection.node import reflect_node
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +37,14 @@ def _make_capability_node(cap: Capability):
 
     On success the produced keys are merged with an incremented cursor, so the
     checkpoint after this node already points at the next step. On failure the
-    error is recorded *without* advancing the cursor, so ``route`` sends control
-    to the planner for a bounded replan that retries this same step.
+    error is recorded *without* advancing the cursor (with the exception class
+    name for the diagnoser), so ``route`` sends control to the ``reflect`` node
+    for diagnosis + auto-fix, which either retries this same step or escalates to
+    the planner.
+
+    Both paths clear ``pending_retry_capability``: on success the retry is
+    consumed, and on a fresh failure a stale retry flag must not shadow the new
+    ``plan_error`` when ``route`` runs.
     """
 
     def _node(state: RunState) -> dict:
@@ -46,9 +53,15 @@ def _make_capability_node(cap: Capability):
         except Exception as exc:  # noqa: BLE001 — surfaced via state, not raised
             logger.warning("run=%s capability '%s' failed: %s",
                            state.get("run_id"), cap.name, exc)
-            return {"plan_error": str(exc), "failed_capability": cap.name}
+            return {
+                "plan_error": str(exc),
+                "failed_capability": cap.name,
+                "failed_exc_type": type(exc).__name__,
+                "pending_retry_capability": None,
+            }
         cursor = state.get("plan_cursor", 0)
-        return {**produced, "plan_cursor": cursor + 1}
+        return {**produced, "plan_cursor": cursor + 1,
+                "pending_retry_capability": None}
 
     return _node
 
@@ -60,17 +73,22 @@ def build_graph():
 
     graph.add_node("profile", profile_node)
     graph.add_node("planner", planner_node)
+    graph.add_node("reflect", reflect_node)
     for name, cap in REGISTRY.items():
         graph.add_node(name, _make_capability_node(cap))
 
     graph.add_edge(START, "profile")
     graph.add_edge("profile", "planner")
 
-    # planner and every capability hand control back to route(), which returns
-    # the next capability name, "planner" (replan after a runtime failure), or
-    # "__end__".
-    path_map = {name: name for name in REGISTRY} | {"planner": "planner", "__end__": END}
+    # planner, reflect, and every capability hand control back to route(), which
+    # returns the next capability name, "reflect" (diagnose a runtime failure),
+    # "planner" (replan after reflection escalates), or "__end__".
+    path_map = (
+        {name: name for name in REGISTRY}
+        | {"planner": "planner", "reflect": "reflect", "__end__": END}
+    )
     graph.add_conditional_edges("planner", route, path_map)
+    graph.add_conditional_edges("reflect", route, path_map)
     for name in REGISTRY:
         graph.add_conditional_edges(name, route, path_map)
 

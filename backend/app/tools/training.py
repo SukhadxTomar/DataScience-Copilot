@@ -32,11 +32,17 @@ def train_models(
     target_column: str,
     problem_type: str,
     artifacts_dir: Path,
+    cv_folds: int = CV_FOLDS,
 ) -> dict[str, Any]:
     """Train candidate models and persist the best one.
 
+    ``cv_folds`` defaults to :data:`CV_FOLDS` but can be lowered by the reflection
+    layer's ``reduce_cv_folds`` knob repair (e.g. when a class has too few members
+    for the default fold count). Values below 2 are clamped to 2.
+
     Returns per-model CV scores and the path of the winning model.
     """
+    folds = max(2, int(cv_folds))
     df = pd.read_parquet(data_path)
     y = df[target_column]
     X = df.drop(columns=[target_column])
@@ -66,7 +72,7 @@ def train_models(
 
     for name, estimator in candidates.items():
         pipeline = Pipeline([("prep", preprocessor), ("model", estimator)])
-        scores = cross_val_score(pipeline, X, y, cv=CV_FOLDS, scoring=scoring, n_jobs=-1)
+        scores = cross_val_score(pipeline, X, y, cv=folds, scoring=scoring, n_jobs=-1)
         mean_score = float(scores.mean())
         results.append({
             "model": name,
@@ -90,6 +96,7 @@ def train_models(
         "metric": scoring,
         "model_path": str(model_path),
         "feature_columns": X.columns.tolist(),
+        "cv_folds": folds,
         "n_samples": len(df),
     }
 

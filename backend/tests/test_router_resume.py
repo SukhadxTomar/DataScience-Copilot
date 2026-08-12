@@ -1,9 +1,11 @@
-"""Runtime replan + checkpoint test.
+"""Runtime failure -> reflection auto-fix -> retry test.
 
-When a capability fails at execution time, the router routes back to the
-planner for a bounded replan that retries the failed step — without
-re-invoking the planner LLM (the validated plan persists in checkpointed
-state). This drives that path with a capability rigged to fail once.
+When a capability fails at execution time, the router now routes to the
+``reflect`` node, which diagnoses the failure, applies a deterministic repair,
+and re-dispatches the SAME capability — without re-invoking the planner LLM (the
+validated plan persists in checkpointed state). This drives that path with a
+capability rigged to fail once with a transient error the taxonomy classifies
+confidently (so diagnosis stays offline via the heuristic tier).
 """
 
 from __future__ import annotations
@@ -38,13 +40,15 @@ def flaky_env(tmp_path: Path, monkeypatch):
     make_dataframe().to_csv(ds_dir / "raw.csv", index=False)
     (ds_dir / "metadata.json").write_text(json.dumps({"dataset_id": dataset_id}))
 
-    # training fails on its first call, succeeds on the retry.
+    # training fails on its first call with a transient error, succeeds on retry.
+    # "rate limit" is a confident TRANSIENT_ERROR heuristic hit -> retry_llm
+    # repair -> re-dispatch training, all without a network call.
     calls = {"training": 0}
 
     def flaky_training(state):
         calls["training"] += 1
         if calls["training"] == 1:
-            raise RuntimeError("transient training failure")
+            raise RuntimeError("429 rate limit exceeded, please retry")
         return training_node(state)
 
     flaky_cap = reg.Capability(
@@ -69,6 +73,10 @@ def flaky_env(tmp_path: Path, monkeypatch):
     ])
     monkeypatch.setattr("app.graph.nodes.get_llm_client", lambda: fake)
     monkeypatch.setattr("app.planner.planner_node.get_llm_client", lambda: fake)
+    # The reflect node resolves its own LLM for the diagnosis fallback. The
+    # transient error is a confident heuristic hit so the fallback is never
+    # reached, but patch the seam so a classification change can't leak a call.
+    monkeypatch.setattr("app.reflection.node.get_llm_client", lambda: fake)
 
     from app.graph import builder
     builder.build_graph.cache_clear()
@@ -76,10 +84,12 @@ def flaky_env(tmp_path: Path, monkeypatch):
     def run():
         graph = builder.build_graph()
         state = {"run_id": "run001", "dataset_id": dataset_id,
-                 "problem_text": "predict churn", "status": "running"}
+                 "problem_text": "predict churn", "status": "running",
+                 "reflection_history": [], "reflection_attempts": {},
+                 "repair_attempts": 0, "escalate_to_planner": False}
         final = graph.invoke(
             state,
-            config={"configurable": {"thread_id": "run001"}, "recursion_limit": 30},
+            config={"configurable": {"thread_id": "run001"}, "recursion_limit": 40},
         )
         return final, fake, calls
 
@@ -87,16 +97,25 @@ def flaky_env(tmp_path: Path, monkeypatch):
     builder.build_graph.cache_clear()
 
 
-def test_runtime_failure_replans_and_recovers(flaky_env):
+def test_runtime_failure_reflects_repairs_and_recovers(flaky_env):
     final, fake, calls = flaky_env()
 
     # The run completed despite the first training attempt failing.
     assert final["status"] == "completed"
     assert calls["training"] == 2          # failed once, retried once
-    assert final["replan_count"] == 1      # exactly one replan consumed
+
+    # Recovery went through the reflection layer, not a planner replan.
+    assert final.get("replan_count", 0) == 0        # planner never escalated
+    assert final["repair_attempts"] == 1            # exactly one repair applied
+    assert final["reflection_history"]              # the cycle was recorded
+    record = final["reflection_history"][-1]
+    assert record["failed_capability"] == "training"
+    assert record["diagnosis"]["category"] == "TRANSIENT_ERROR"
+    assert record["repair_result"]["repair_name"] == "retry_llm"
+    assert final["last_repair"]["applied"] is True
 
     # The planner LLM was called exactly once — the plan persisted through the
-    # replan rather than being regenerated.
+    # repair rather than being regenerated.
     planner_calls = [c for c in fake.calls if c["schema"] == "ExecutionPlan"]
     assert len(planner_calls) == 1
 

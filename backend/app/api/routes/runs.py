@@ -19,6 +19,7 @@ from pydantic import BaseModel
 
 from app.core.config import settings
 from app.graph.builder import build_graph
+from app.planner.registry import REGISTRY
 
 router = APIRouter()
 
@@ -47,6 +48,10 @@ class RunResponse(BaseModel):
     explanation_report: dict[str, Any] | None = None
     recommendations: dict[str, Any] | None = None
     report: dict[str, Any] | None = None
+    # Reflection / auto-fix audit trail (Phase 5).
+    reflection_history: list[dict[str, Any]] | None = None
+    repair_attempts: int | None = None
+    errors: list[str] | None = None
     error: str | None = None
 
 
@@ -70,13 +75,32 @@ def create_run(req: CreateRunRequest) -> RunResponse:
         "dataset_id": req.dataset_id,
         "problem_text": req.problem_text,
         "status": "running",
+        # Seed the reflection / auto-fix control keys so the audit trail is
+        # deterministic and the reflect node never reads an unset budget.
+        "reflection_history": [],
+        "reflection_attempts": {},
+        "repair_attempts": 0,
+        "escalate_to_planner": False,
     }
 
     graph = build_graph()
     # recursion_limit backstops the router loop: it caps total node visits so a
     # bug that fails to advance the plan cursor trips the limit instead of
-    # looping forever.
-    config = {"configurable": {"thread_id": run_id}, "recursion_limit": 30}
+    # looping forever. It is sized above the reflection layer's own budgets
+    # (reflection_attempts / repair_attempts / replan_attempts) so those produce
+    # a clean `needs_input` outcome first, and the limit only ever fires on a
+    # genuine non-advancing loop. Base plan ≈ 8 nodes; each repair adds a
+    # reflect+retry hop, each escalation a reflect+planner hop.
+    recursion_limit = (
+        len(REGISTRY)
+        + 2 * settings.repair_attempts       # reflect + retry per repair
+        + 2 * settings.replan_attempts       # reflect + planner per escalation
+        + 10                                 # profile/planner + comfortable slack
+    )
+    config = {
+        "configurable": {"thread_id": run_id},
+        "recursion_limit": recursion_limit,
+    }
 
     try:
         final_state = graph.invoke(initial_state, config=config)
@@ -118,6 +142,11 @@ def create_run(req: CreateRunRequest) -> RunResponse:
         "explanation_report": final_state.get("explanation_report"),
         "recommendations": final_state.get("recommendations"),
         "report": final_state.get("report"),
+        # Reflection / auto-fix audit trail: what the self-healing layer
+        # diagnosed and repaired, and any diagnostics from an exhausted budget.
+        "reflection_history": final_state.get("reflection_history"),
+        "repair_attempts": final_state.get("repair_attempts"),
+        "errors": final_state.get("errors"),
     }
     (_runs_dir(run_id) / "run.json").write_text(json.dumps(record, indent=2))
 
