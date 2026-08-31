@@ -3,6 +3,10 @@
 A run represents one pipeline execution: one dataset, one problem
 statement, one pass through the graph. Run records are persisted as JSON
 under the storage directory.
+
+Runs execute in a background task: ``POST /runs`` returns immediately with a
+``running`` record, and the client polls ``GET /runs/{run_id}`` until the
+status reaches a terminal value (``completed`` / ``failed`` / ``needs_input``).
 """
 
 from __future__ import annotations
@@ -13,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -61,8 +65,20 @@ def _runs_dir(run_id: str) -> Path:
     return d
 
 
+def _write_run(run_id: str, record: dict[str, Any]) -> None:
+    """Persist a run record to run.json."""
+    (_runs_dir(run_id) / "run.json").write_text(json.dumps(record, indent=2))
+
+
 @router.post("", response_model=RunResponse)
-def create_run(req: CreateRunRequest) -> RunResponse:
+def create_run(req: CreateRunRequest, background_tasks: BackgroundTasks) -> RunResponse:
+    """Start a pipeline run and return immediately.
+
+    The graph executes in a background task, so the HTTP call no longer blocks
+    for the whole run. A ``running`` record is persisted up front so an
+    immediate ``GET /runs/{run_id}`` succeeds; the client polls that endpoint
+    until the status becomes terminal.
+    """
     ds_dir = settings.datasets_dir / req.dataset_id
     if not (ds_dir / "metadata.json").exists():
         raise HTTPException(status_code=404, detail="Dataset not found")
@@ -83,6 +99,43 @@ def create_run(req: CreateRunRequest) -> RunResponse:
         "escalate_to_planner": False,
     }
 
+    # Persist a `running` record before returning so an immediate poll succeeds
+    # while the pipeline runs in the background.
+    _write_run(
+        run_id,
+        {
+            "run_id": run_id,
+            "dataset_id": req.dataset_id,
+            "problem_text": req.problem_text,
+            "status": "running",
+            "created_at": created_at,
+        },
+    )
+
+    background_tasks.add_task(_execute_run, run_id, req, created_at, initial_state)
+
+    return RunResponse(
+        run_id=run_id,
+        dataset_id=req.dataset_id,
+        status="running",
+        problem_text=req.problem_text,
+        created_at=created_at,
+    )
+
+
+def _execute_run(
+    run_id: str,
+    req: CreateRunRequest,
+    created_at: str,
+    initial_state: dict[str, Any],
+) -> None:
+    """Execute the graph to completion and persist the terminal run record.
+
+    Runs off the request thread via ``BackgroundTasks``, so a long pipeline
+    never holds the HTTP connection open. A node failure is recorded as a
+    ``failed`` run rather than raised — the run record, not the request, is the
+    unit the frontend tracks.
+    """
     graph = build_graph()
     # recursion_limit backstops the router loop: it caps total node visits so a
     # bug that fails to advance the plan cursor trips the limit instead of
@@ -107,50 +160,47 @@ def create_run(req: CreateRunRequest) -> RunResponse:
     except Exception as exc:
         # A node failure produces a failed run record, not an HTTP 500 —
         # the run itself is the unit the frontend tracks.
-        record = {
-            **initial_state,
-            "status": "failed",
-            "error": str(exc),
-            "created_at": created_at,
-        }
-        (_runs_dir(run_id) / "run.json").write_text(json.dumps(record, indent=2))
-        return RunResponse(
-            run_id=run_id,
-            dataset_id=req.dataset_id,
-            status="failed",
-            problem_text=req.problem_text,
-            created_at=created_at,
-            error=str(exc),
+        _write_run(
+            run_id,
+            {
+                "run_id": run_id,
+                "dataset_id": req.dataset_id,
+                "problem_text": req.problem_text,
+                "status": "failed",
+                "created_at": created_at,
+                "error": str(exc),
+            },
         )
+        return
 
-    record = {
-        "run_id": run_id,
-        "dataset_id": req.dataset_id,
-        "problem_text": req.problem_text,
-        "status": final_state.get("status", "completed"),
-        "created_at": created_at,
-        "summary": final_state.get("summary"),
-        "execution_plan": final_state.get("execution_plan"),
-        "plan_reasoning": final_state.get("plan_reasoning"),
-        "warnings": final_state.get("warnings"),
-        "insights": final_state.get("insights"),
-        "problem_spec": final_state.get("problem_spec"),
-        "cleaning_report": final_state.get("cleaning_report"),
-        "feature_report": final_state.get("feature_report"),
-        "training_report": final_state.get("training_report"),
-        "evaluation_report": final_state.get("evaluation_report"),
-        "explanation_report": final_state.get("explanation_report"),
-        "recommendations": final_state.get("recommendations"),
-        "report": final_state.get("report"),
-        # Reflection / auto-fix audit trail: what the self-healing layer
-        # diagnosed and repaired, and any diagnostics from an exhausted budget.
-        "reflection_history": final_state.get("reflection_history"),
-        "repair_attempts": final_state.get("repair_attempts"),
-        "errors": final_state.get("errors"),
-    }
-    (_runs_dir(run_id) / "run.json").write_text(json.dumps(record, indent=2))
-
-    return RunResponse(**record)
+    _write_run(
+        run_id,
+        {
+            "run_id": run_id,
+            "dataset_id": req.dataset_id,
+            "problem_text": req.problem_text,
+            "status": final_state.get("status", "completed"),
+            "created_at": created_at,
+            "summary": final_state.get("summary"),
+            "execution_plan": final_state.get("execution_plan"),
+            "plan_reasoning": final_state.get("plan_reasoning"),
+            "warnings": final_state.get("warnings"),
+            "insights": final_state.get("insights"),
+            "problem_spec": final_state.get("problem_spec"),
+            "cleaning_report": final_state.get("cleaning_report"),
+            "feature_report": final_state.get("feature_report"),
+            "training_report": final_state.get("training_report"),
+            "evaluation_report": final_state.get("evaluation_report"),
+            "explanation_report": final_state.get("explanation_report"),
+            "recommendations": final_state.get("recommendations"),
+            "report": final_state.get("report"),
+            # Reflection / auto-fix audit trail: what the self-healing layer
+            # diagnosed and repaired, and any diagnostics from an exhausted budget.
+            "reflection_history": final_state.get("reflection_history"),
+            "repair_attempts": final_state.get("repair_attempts"),
+            "errors": final_state.get("errors"),
+        },
+    )
 
 
 @router.get("/{run_id}", response_model=RunResponse)

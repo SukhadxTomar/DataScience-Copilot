@@ -19,3 +19,25 @@ export async function parseJSON<T>(res: Response): Promise<T> {
   }
   return data as T
 }
+
+/**
+ * Poll `GET /api/runs/{runId}` until the run reaches a terminal status.
+ *
+ * The pipeline runs in the background, so `POST /api/runs` returns a `running`
+ * record immediately and the client waits here — no single long-lived request
+ * that can time out on a proxy or load balancer.
+ */
+export async function pollRun<T extends { status: string }>(
+  runId: string,
+  { intervalMs = 2000, timeoutMs = 15 * 60_000 }: { intervalMs?: number; timeoutMs?: number } = {}
+): Promise<T> {
+  const deadline = Date.now() + timeoutMs
+  while (true) {
+    const run = await parseJSON<T>(await fetch(`${API_BASE}/api/runs/${runId}`))
+    if (run.status !== "running" && run.status !== "queued") return run
+    if (Date.now() > deadline) {
+      throw new Error("Run is taking longer than expected — check back later.")
+    }
+    await new Promise((r) => setTimeout(r, intervalMs))
+  }
+}

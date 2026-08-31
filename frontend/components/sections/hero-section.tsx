@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Upload, MessagesSquare, Workflow, Database, Download, X, FileText, CheckCircle2, Loader2 } from "lucide-react"
 import { WebGLShader } from "@/components/ui/web-gl-shader"
 import { LiquidGlassButton } from "@/components/ui/liquid-glass-button"
-import { API_BASE, parseJSON } from "@/lib/api"
+import { API_BASE, parseJSON, pollRun } from "@/lib/api"
 import type { RunResult } from "@/app/page"
 
 const steps = [
@@ -68,13 +68,17 @@ export function HeroSection({ onComplete }: { onComplete: (r: RunResult) => void
     setRunState("running")
     setRunError("")
     try {
-      const data = await parseJSON<RunResult>(
+      // Kick off the run — the backend returns immediately with a `running`
+      // record and executes the pipeline in the background.
+      const { run_id } = await parseJSON<RunResult>(
         await fetch(`${API_BASE}/api/runs`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ dataset_id: datasetId, problem_text: problem }),
         })
       )
+      // Poll GET /runs/{id} until the pipeline reaches a terminal status.
+      const data = await pollRun<RunResult>(run_id)
       if (data.status === "failed" || data.status === "needs_input") {
         throw new Error(data.error ?? `Run ended with status: ${data.status}`)
       }
